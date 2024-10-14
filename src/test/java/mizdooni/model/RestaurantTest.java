@@ -1,6 +1,5 @@
 package mizdooni.model;
 
-import mizdooni.exceptions.InvalidReviewRating;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,25 +11,118 @@ import static org.junit.jupiter.api.Assertions.*;
 class RestaurantTest {
     private Restaurant restaurant;
     private User manager;
+    private User client;
+    private static Address DEFAULT_ADDRESS = new Address("Street", "City", "Country");
+    private static String DEFAULT_PASSWORD = "password";
 
     @BeforeEach
     void setUp() {
-        manager = new User("managerUsername", "password", "manager@example.com", new Address("Street", "City", "Country"), User.Role.manager);
-        Address address = new Address("Street", "City", "Country");
-        restaurant = new Restaurant("Test Restaurant", manager, "Italian", LocalTime.of(10, 0), LocalTime.of(22, 0), "A great place", address, "imageLink");
+        manager = createUserWithDefaultAddressAndPass("managerUsername", "manager@example.com", User.Role.manager);
+        client = createUserWithDefaultAddressAndPass("clientUsername", "client@example.com", User.Role.client);
+        restaurant = new Restaurant("Test", manager, "Italian", LocalTime.of(10, 0), LocalTime.of(22, 0), "A great place", DEFAULT_ADDRESS, "imageLink");
+    }
+
+    private Rating createRating(double food, double service, double ambiance, double overall) {
+        Rating rating = new Rating();
+        rating.food = food;
+        rating.service = service;
+        rating.ambiance = ambiance;
+        rating.overall = overall;
+        return rating;
+    }
+
+    private User createUserWithDefaultAddressAndPass(String username, String email, User.Role role){
+        return new User(username, DEFAULT_PASSWORD, email, DEFAULT_ADDRESS, role);
+    }
+    @Test
+    void testAddFirstReviewForNewUser() {
+        int initialReviewCount = restaurant.getReviews().size();
+        User anotherClient = createUserWithDefaultAddressAndPass("anotherClientUsername", "anotherClient@example.com", User.Role.client);
+
+        Rating rating = createRating(5, 5, 5, 5);
+        Review review = new Review(anotherClient, rating, "Great food!", LocalDateTime.now());
+        restaurant.addReview(review);
+
+        assertEquals(initialReviewCount + 1, restaurant.getReviews().size());
+        assertEquals(review, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
     }
 
     @Test
-    void testAddReview()  {
-        Rating rating = new Rating();
-        rating.food = 4;
-        rating.service = 4;
-        rating.ambiance = 5;
-        rating.overall = 4.5;
-        String comment = "Great food!";
-        Review review = new Review(manager, rating, comment, LocalDateTime.now());
-        restaurant.addReview(review);
-        assertEquals(1, restaurant.getReviews().size());
-        assertEquals(review, restaurant.getReviews().get(0));
+    void testReplaceExistingReviewOnNewSubmission() {
+        Rating rating1 = createRating(5, 5, 5, 5);
+        Review review1 = new Review(client, rating1, "Great food!", LocalDateTime.now());
+        restaurant.addReview(review1);
+
+        int reviewCountBeforeUpdate = restaurant.getReviews().size();
+        Rating rating2 =  createRating(4, 4, 4, 4);
+        Review review2 = new Review(client, rating2, "Great place!", LocalDateTime.now());
+        restaurant.addReview(review2);
+
+        assertEquals(reviewCountBeforeUpdate, restaurant.getReviews().size());
+        assertEquals(review2, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
+    }
+
+    @Test
+    void testGetAverageRating() {
+        restaurant.getReviews().add(new Review(client, createRating(5,5,5,5), "Excellent!", LocalDateTime.now()));
+
+        User anotherClient = createUserWithDefaultAddressAndPass("anotherClientUsername", "anotherClient@example.com", User.Role.client);
+        restaurant.getReviews().add(new Review(anotherClient, createRating(4,4,4,4), "Excellent!", LocalDateTime.now()));
+
+        Rating averageRating = restaurant.getAverageRating();
+
+        assertEquals(4.5, averageRating.food);
+        assertEquals(4.5, averageRating.service);
+        assertEquals(4.5, averageRating.ambiance);
+        assertEquals(4.5, averageRating.overall);
+    }
+
+    @Test
+    void testGetAverageRatingWithNoReviews() {
+        Rating averageRating = restaurant.getAverageRating();
+
+        assertEquals(0.0, averageRating.food);
+        assertEquals(0.0, averageRating.service);
+        assertEquals(0.0, averageRating.ambiance);
+        assertEquals(0.0, averageRating.overall);
+    }
+
+    @Test
+    void testGetStarCount() {
+        restaurant.addReview(new Review(client, createRating(3,3,4,3), "Great food!", LocalDateTime.now()));
+        assertEquals(3, restaurant.getStarCount());
+    }
+
+    @Test
+    void testAddTable() {
+        int initialTableCount  = restaurant.getTables().size();
+        Table table = new Table(0, restaurant.getId(), 6);
+        restaurant.addTable(table);
+
+        assertEquals(initialTableCount  + 1, restaurant.getTables().get( restaurant.getTables().size() - 1).getTableNumber());
+        assertEquals(initialTableCount  + 1, restaurant.getTables().size());
+        assertEquals(table, restaurant.getTables().get( restaurant.getTables().size() - 1));
+    }
+
+    @Test
+    void testGetTable() {
+        Table table1 = new Table(1, restaurant.getId(), 6);
+        Table table2 = new Table(2, restaurant.getId(), 3);
+        Table table3 = new Table(3, restaurant.getId(), 4);
+        restaurant.getTables().add(table1);
+        restaurant.getTables().add(table2);
+        restaurant.getTables().add(table3);
+
+        assertEquals(table2, restaurant.getTable(2));
+    }
+    @Test
+    void testGetMaxSeatsNumber() {
+        Table table1 = new Table(0, restaurant.getId(), 6);
+        Table table2 = new Table(0, restaurant.getId(), 3);
+
+        restaurant.addTable(table1);
+        restaurant.addTable(table2);
+
+        assertEquals(6, restaurant.getMaxSeatsNumber());
     }
 }
