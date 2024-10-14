@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RestaurantTest {
     private Restaurant restaurant;
@@ -31,9 +31,10 @@ class RestaurantTest {
         return rating;
     }
 
-    private User createUserWithDefaultAddressAndPass(String username, String email, User.Role role){
+    private User createUserWithDefaultAddressAndPass(String username, String email, User.Role role) {
         return new User(username, DEFAULT_PASSWORD, email, DEFAULT_ADDRESS, role);
     }
+
     @Test
     void testAddFirstReviewForNewUser() {
         int initialReviewCount = restaurant.getReviews().size();
@@ -54,7 +55,7 @@ class RestaurantTest {
         restaurant.addReview(review1);
 
         int reviewCountBeforeUpdate = restaurant.getReviews().size();
-        Rating rating2 =  createRating(4, 4, 4, 4);
+        Rating rating2 = createRating(4, 4, 4, 4);
         Review review2 = new Review(client, rating2, "Great place!", LocalDateTime.now());
         restaurant.addReview(review2);
 
@@ -64,10 +65,10 @@ class RestaurantTest {
 
     @Test
     void testGetAverageRating() {
-        restaurant.getReviews().add(new Review(client, createRating(5,5,5,5), "Excellent!", LocalDateTime.now()));
+        restaurant.getReviews().add(new Review(client, createRating(5, 5, 5, 5), "Excellent!", LocalDateTime.now()));
 
         User anotherClient = createUserWithDefaultAddressAndPass("anotherClientUsername", "anotherClient@example.com", User.Role.client);
-        restaurant.getReviews().add(new Review(anotherClient, createRating(4,4,4,4), "Excellent!", LocalDateTime.now()));
+        restaurant.getReviews().add(new Review(anotherClient, createRating(4, 4, 4, 4), "Excellent!", LocalDateTime.now()));
 
         Rating averageRating = restaurant.getAverageRating();
 
@@ -89,19 +90,19 @@ class RestaurantTest {
 
     @Test
     void testGetStarCount() {
-        restaurant.addReview(new Review(client, createRating(3,3,4,3), "Great food!", LocalDateTime.now()));
+        restaurant.addReview(new Review(client, createRating(3, 3, 4, 3), "Great food!", LocalDateTime.now()));
         assertEquals(3, restaurant.getStarCount());
     }
 
     @Test
     void testAddTable() {
-        int initialTableCount  = restaurant.getTables().size();
+        int initialTableCount = restaurant.getTables().size();
         Table table = new Table(0, restaurant.getId(), 6);
         restaurant.addTable(table);
 
-        assertEquals(initialTableCount  + 1, restaurant.getTables().get( restaurant.getTables().size() - 1).getTableNumber());
-        assertEquals(initialTableCount  + 1, restaurant.getTables().size());
-        assertEquals(table, restaurant.getTables().get( restaurant.getTables().size() - 1));
+        assertEquals(initialTableCount + 1, restaurant.getTables().get(restaurant.getTables().size() - 1).getTableNumber());
+        assertEquals(initialTableCount + 1, restaurant.getTables().size());
+        assertEquals(table, restaurant.getTables().get(restaurant.getTables().size() - 1));
     }
 
     @Test
@@ -115,6 +116,7 @@ class RestaurantTest {
 
         assertEquals(table2, restaurant.getTable(2));
     }
+
     @Test
     void testGetMaxSeatsNumber() {
         Table table1 = new Table(0, restaurant.getId(), 6);
