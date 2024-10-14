@@ -46,13 +46,18 @@ class RestaurantTest {
 
         assertEquals(initialReviewCount + 1, restaurant.getReviews().size());
         assertEquals(review, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
+        assertEquals(anotherClient.getId(), restaurant.getReviews().get(restaurant.getReviews().size() - 1).getUser().getId());
+        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().food);
+        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().service);
+        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().ambiance);
+        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().overall);
     }
 
     @Test
     void testReplaceExistingReviewOnNewSubmission() {
         Rating rating1 = createRating(5, 5, 5, 5);
         Review review1 = new Review(client, rating1, "Great food!", LocalDateTime.now());
-        restaurant.addReview(review1);
+        restaurant.getReviews().add(review1);
 
         int reviewCountBeforeUpdate = restaurant.getReviews().size();
         Rating rating2 = createRating(4, 4, 4, 4);
@@ -61,6 +66,11 @@ class RestaurantTest {
 
         assertEquals(reviewCountBeforeUpdate, restaurant.getReviews().size());
         assertEquals(review2, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
+        assertEquals(client.getId(), restaurant.getReviews().get(restaurant.getReviews().size() - 1).getUser().getId());
+        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().food);
+        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().service);
+        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().ambiance);
+        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().overall);
     }
 
     @Test
@@ -100,9 +110,10 @@ class RestaurantTest {
         Table table = new Table(0, restaurant.getId(), 6);
         restaurant.addTable(table);
 
-        assertEquals(initialTableCount + 1, restaurant.getTables().get(restaurant.getTables().size() - 1).getTableNumber());
         assertEquals(initialTableCount + 1, restaurant.getTables().size());
         assertEquals(table, restaurant.getTables().get(restaurant.getTables().size() - 1));
+        assertEquals(initialTableCount + 1, restaurant.getTables().get(restaurant.getTables().size() - 1).getTableNumber());
+        assertEquals(6, restaurant.getTables().get(restaurant.getTables().size() - 1).getSeatsNumber());
     }
 
     @Test
@@ -115,6 +126,8 @@ class RestaurantTest {
         restaurant.getTables().add(table3);
 
         assertEquals(table2, restaurant.getTable(2));
+        assertEquals( 2, restaurant.getTable(2).getTableNumber());
+        assertEquals(3, restaurant.getTable(2).getSeatsNumber());
     }
 
     @Test
