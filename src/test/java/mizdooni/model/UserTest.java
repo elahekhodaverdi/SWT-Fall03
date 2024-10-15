@@ -30,11 +30,20 @@ public class UserTest {
         reservation2 = new Reservation(user, restaurant, table2, LocalDateTime.now().plusHours(-2));
     }
 
+    private boolean reservationsEqual(Reservation reservation1, Reservation reservation2) {
+        return (reservation1.getReservationNumber() == reservation2.getReservationNumber()) &&
+                (reservation1.getDateTime() == reservation2.getDateTime()) &&
+                (reservation1.getRestaurant().getId() == reservation2.getRestaurant().getId()) &&
+                (reservation1.getRestaurant().getName().equals(reservation2.getRestaurant().getName())) &&
+                (reservation1.getUser().getId() == reservation2.getUser().getId()) &&
+                (reservation1.getUser().getUsername().equals(reservation2.getUser().getUsername()));
+    }
+
     @Test
     void testAddReservation() {
         user.addReservation(reservation1);
         assertEquals(1, user.getReservations().size());
-        assertEquals(reservation1, user.getReservations().getFirst());
+        assertTrue(reservationsEqual(user.getReservations().getFirst(), reservation1));
     }
 
     @Test
@@ -54,7 +63,7 @@ public class UserTest {
         user.addReservation(reservation1);
         Reservation fetchedReservation = user.getReservation(reservation1.getReservationNumber());
         assertNotNull(fetchedReservation);
-        assertEquals(reservation1, fetchedReservation);
+        assertTrue(reservationsEqual(fetchedReservation, reservation1));
 
         reservation1.cancel();
         fetchedReservation = user.getReservation(reservation1.getReservationNumber());

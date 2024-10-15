@@ -30,11 +30,20 @@ public class TableTest {
         reservation2 = new Reservation(user, restaurant, table, LocalDateTime.now().plusHours(-2));
     }
 
+    private boolean reservationsEqual(Reservation reservation1, Reservation reservation2) {
+        return (reservation1.getReservationNumber() == reservation2.getReservationNumber()) &&
+                (reservation1.getDateTime() == reservation2.getDateTime()) &&
+                (reservation1.getRestaurant().getId() == reservation2.getRestaurant().getId()) &&
+                (reservation1.getRestaurant().getName().equals(reservation2.getRestaurant().getName())) &&
+                (reservation1.getUser().getId() == reservation2.getUser().getId()) &&
+                (reservation1.getUser().getUsername().equals(reservation2.getUser().getUsername()));
+    }
+
     @Test
     void testAddReservation() {
         table.addReservation(reservation1);
         assertEquals(1, table.getReservations().size());
-        assertEquals(reservation1, table.getReservations().getFirst());
+        assertTrue(reservationsEqual(table.getReservations().getFirst(), reservation1));
     }
 
     @Test
