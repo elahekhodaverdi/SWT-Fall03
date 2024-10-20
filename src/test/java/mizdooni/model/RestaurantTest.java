@@ -74,7 +74,7 @@ class RestaurantTest {
     }
 
     @Test
-    void testGetAverageRating() {
+    void testGetAverageRatingWithReviews() {
         restaurant.getReviews().add(new Review(client, createRating(5, 5, 5, 5), "Excellent!", LocalDateTime.now()));
 
         User anotherClient = createUserWithDefaultAddressAndPass("anotherClientUsername", "anotherClient@example.com", User.Role.client);
@@ -131,7 +131,7 @@ class RestaurantTest {
     }
 
     @Test
-    void testGetMaxSeatsNumber() {
+    void testGetMaxSeatsNumberWithTables() {
         Table table1 = new Table(0, restaurant.getId(), 6);
         Table table2 = new Table(0, restaurant.getId(), 3);
 
@@ -139,5 +139,10 @@ class RestaurantTest {
         restaurant.addTable(table2);
 
         assertEquals(6, restaurant.getMaxSeatsNumber());
+    }
+
+    @Test
+    void testGetMaxSeatsNumberWithNoTables() {
+        assertEquals(0, restaurant.getMaxSeatsNumber());
     }
 }
