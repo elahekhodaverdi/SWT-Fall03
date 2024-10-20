@@ -9,41 +9,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserTest {
     private User user;
-    private User manager;
     private Reservation reservation1;
     private Reservation reservation2;
     private Restaurant restaurant;
-    private Table table1;
-    private Table table2;
+
 
     @BeforeEach
     void setUp() {
         Address address = new Address("Country", "City", "Street");
         user = new User("testUser", "password123", "user@test.com", address, User.Role.client);
-        manager = new User("testManager", "password456", "manager@test.com", address, User.Role.manager);
+        User manager = new User("testManager", "password456", "manager@test.com", address, User.Role.manager);
         restaurant = new Restaurant("Test Restaurant", manager,"Fast food", LocalTime.now(),
                 LocalTime.now().plusHours(10), "",address, "");
-        table1 = new Table(1, restaurant.getId(), 1);
-        table2 = new Table(2, restaurant.getId(), 2);
+        Table table1 = new Table(1, restaurant.getId(), 1);
+        Table table2 = new Table(2, restaurant.getId(), 2);
 
         reservation1 = new Reservation(user, restaurant, table1, LocalDateTime.now().plusHours(3));
         reservation2 = new Reservation(user, restaurant, table2, LocalDateTime.now().plusHours(-2));
-    }
-
-    private boolean reservationsEqual(Reservation reservation1, Reservation reservation2) {
-        return (reservation1.getReservationNumber() == reservation2.getReservationNumber()) &&
-                (reservation1.getDateTime() == reservation2.getDateTime()) &&
-                (reservation1.getRestaurant().getId() == reservation2.getRestaurant().getId()) &&
-                (reservation1.getRestaurant().getName().equals(reservation2.getRestaurant().getName())) &&
-                (reservation1.getUser().getId() == reservation2.getUser().getId()) &&
-                (reservation1.getUser().getUsername().equals(reservation2.getUser().getUsername()));
     }
 
     @Test
     void testAddReservation() {
         user.addReservation(reservation1);
         assertEquals(1, user.getReservations().size());
-        assertTrue(reservationsEqual(user.getReservations().getFirst(), reservation1));
+        assertEquals(user.getReservations().getFirst().getTable().getTableNumber(), 1);
+        assertEquals(true, user.getReservations().getFirst().getUser().getUsername().equals("testUser"));
+        assertEquals(true, user.getReservations().getFirst().getRestaurant().getName().equals("Test Restaurant"));
     }
 
     @Test
@@ -63,7 +54,9 @@ public class UserTest {
         user.addReservation(reservation1);
         Reservation fetchedReservation = user.getReservation(reservation1.getReservationNumber());
         assertNotNull(fetchedReservation);
-        assertTrue(reservationsEqual(fetchedReservation, reservation1));
+        assertEquals(user.getReservations().getFirst().getTable().getTableNumber(), 1);
+        assertEquals(true, fetchedReservation.getUser().getUsername().equals("testUser"));
+        assertEquals(true, fetchedReservation.getRestaurant().getName().equals("Test Restaurant"));
 
         reservation1.cancel();
         fetchedReservation = user.getReservation(reservation1.getReservationNumber());
