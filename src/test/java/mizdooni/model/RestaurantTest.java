@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RestaurantTest {
     private Restaurant restaurant;
@@ -31,6 +32,13 @@ class RestaurantTest {
         return rating;
     }
 
+    private boolean ratingEquals(Rating rating1, Rating rating2) {
+        return (rating1.food == rating2.food &&
+                rating1.service == rating2.service &&
+                rating1.ambiance == rating2.ambiance &&
+                rating1.overall == rating2.overall);
+    }
+
     private User createUserWithDefaultAddressAndPass(String username, String email, User.Role role) {
         return new User(username, DEFAULT_PASSWORD, email, DEFAULT_ADDRESS, role);
     }
@@ -47,10 +55,8 @@ class RestaurantTest {
         assertEquals(initialReviewCount + 1, restaurant.getReviews().size());
         assertEquals(review, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
         assertEquals(anotherClient.getId(), restaurant.getReviews().get(restaurant.getReviews().size() - 1).getUser().getId());
-        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().food);
-        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().service);
-        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().ambiance);
-        assertEquals(5, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().overall);
+        Review newReview = restaurant.getReviews().get(restaurant.getReviews().size() - 1);
+        assertTrue(ratingEquals(newReview.getRating(), createRating(5,5,5,5)));
     }
 
     @Test
@@ -67,10 +73,9 @@ class RestaurantTest {
         assertEquals(reviewCountBeforeUpdate, restaurant.getReviews().size());
         assertEquals(review2, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
         assertEquals(client.getId(), restaurant.getReviews().get(restaurant.getReviews().size() - 1).getUser().getId());
-        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().food);
-        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().service);
-        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().ambiance);
-        assertEquals(4, restaurant.getReviews().get(restaurant.getReviews().size() - 1).getRating().overall);
+        Review newReview = restaurant.getReviews().get(restaurant.getReviews().size() - 1);
+        assertTrue(ratingEquals(newReview.getRating(), createRating(4,4,4,4)));
+
     }
 
     @Test
@@ -82,20 +87,14 @@ class RestaurantTest {
 
         Rating averageRating = restaurant.getAverageRating();
 
-        assertEquals(4.5, averageRating.food);
-        assertEquals(4.5, averageRating.service);
-        assertEquals(4.5, averageRating.ambiance);
-        assertEquals(4.5, averageRating.overall);
+        assertTrue(ratingEquals(averageRating, createRating(4.5,4.5,4.5,4.5)));
+
     }
 
     @Test
     void testGetAverageRatingWithNoReviews() {
         Rating averageRating = restaurant.getAverageRating();
-
-        assertEquals(0.0, averageRating.food);
-        assertEquals(0.0, averageRating.service);
-        assertEquals(0.0, averageRating.ambiance);
-        assertEquals(0.0, averageRating.overall);
+        assertTrue(ratingEquals(averageRating, createRating(0,0,0,0)));
     }
 
     @Test
