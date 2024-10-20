@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RestaurantTest {
     private Restaurant restaurant;
@@ -56,7 +55,7 @@ class RestaurantTest {
         assertEquals(review, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
         assertEquals(anotherClient.getId(), restaurant.getReviews().get(restaurant.getReviews().size() - 1).getUser().getId());
         Review newReview = restaurant.getReviews().get(restaurant.getReviews().size() - 1);
-        assertTrue(ratingEquals(newReview.getRating(), createRating(5,5,5,5)));
+        assertTrue(ratingEquals(newReview.getRating(), createRating(5, 5, 5, 5)));
     }
 
     @Test
@@ -74,7 +73,7 @@ class RestaurantTest {
         assertEquals(review2, restaurant.getReviews().get(restaurant.getReviews().size() - 1));
         assertEquals(client.getId(), restaurant.getReviews().get(restaurant.getReviews().size() - 1).getUser().getId());
         Review newReview = restaurant.getReviews().get(restaurant.getReviews().size() - 1);
-        assertTrue(ratingEquals(newReview.getRating(), createRating(4,4,4,4)));
+        assertTrue(ratingEquals(newReview.getRating(), createRating(4, 4, 4, 4)));
 
     }
 
@@ -87,14 +86,14 @@ class RestaurantTest {
 
         Rating averageRating = restaurant.getAverageRating();
 
-        assertTrue(ratingEquals(averageRating, createRating(4.5,4.5,4.5,4.5)));
+        assertTrue(ratingEquals(averageRating, createRating(4.5, 4.5, 4.5, 4.5)));
 
     }
 
     @Test
     void testGetAverageRatingWithNoReviews() {
         Rating averageRating = restaurant.getAverageRating();
-        assertTrue(ratingEquals(averageRating, createRating(0,0,0,0)));
+        assertTrue(ratingEquals(averageRating, createRating(0, 0, 0, 0)));
     }
 
     @Test
@@ -125,7 +124,7 @@ class RestaurantTest {
         restaurant.getTables().add(table3);
 
         assertEquals(table2, restaurant.getTable(2));
-        assertEquals( 2, restaurant.getTable(2).getTableNumber());
+        assertEquals(2, restaurant.getTable(2).getTableNumber());
         assertEquals(3, restaurant.getTable(2).getSeatsNumber());
     }
 
