@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static mizdooni.controllers.ControllerUtils.DATETIME_FORMATTER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -60,11 +61,11 @@ class ReservationControllerTest {
         Response response = reservationController.getReservations(restaurant.getId(), table.getTableNumber(),
                 reservation.getDateTime().toLocalDate().toString());
 
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("restaurant table reservations", response.getMessage());
-//        assertEquals(mockReservations, response.getData());
         assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertTrue(response.isSuccess());
+        assertEquals("restaurant table reservations", response.getMessage());
+        assertEquals(Collections.singletonList(reservation), response.getData());
 
         verify(restaurantService).getRestaurant(restaurant.getId());
         verify(reserveService).getReservations(restaurant.getId(), table.getTableNumber(),
@@ -100,11 +101,6 @@ class ReservationControllerTest {
                         reservation.getDateTime().toLocalDate().toString()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("restaurant table reservations", response.getMessage());
-//        assertEquals(mockReservations, response.getData());
-
         verify(restaurantService).getRestaurant(restaurant.getId());
         verify(reserveService).getReservations(restaurant.getId(), table.getTableNumber(),
                 reservation.getDateTime().toLocalDate());
@@ -117,10 +113,10 @@ class ReservationControllerTest {
 
         Response response = reservationController.getCustomerReservations(user.getId());
 
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("user reservations", response.getMessage());
-//        assertEquals(mockReservations, response.getData());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertTrue(response.isSuccess());
+        assertEquals("user reservations", response.getMessage());
+        assertEquals(Collections.singletonList(reservation), response.getData());
         assertNotNull(response);
 
         verify(reserveService).getCustomerReservations(user.getId());
@@ -134,11 +130,6 @@ class ReservationControllerTest {
         ResponseException exception = assertThrows(ResponseException.class,
                 () -> reservationController.getCustomerReservations(user.getId()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("user reservations", response.getMessage());
-//        assertEquals(mockReservations, response.getData());
 
         verify(reserveService).getCustomerReservations(user.getId());
     }
@@ -154,10 +145,10 @@ class ReservationControllerTest {
 
         Response response = reservationController.getAvailableTimes(restaurant.getId(), people, date.toString());
 
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("available times", response.getMessage());
-//        assertEquals(availableTimes, response.getData());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertTrue(response.isSuccess());
+        assertEquals("available times", response.getMessage());
+        assertEquals(availableTimes, response.getData());
         assertNotNull(response);
 
         verify(restaurantService).getRestaurant(restaurant.getId());
@@ -197,11 +188,6 @@ class ReservationControllerTest {
                         date.toString()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("restaurant table reservations", response.getMessage());
-//        assertEquals(mockReservations, response.getData());
-
         verify(restaurantService).getRestaurant(restaurant.getId());
         verify(reserveService).getAvailableTimes(restaurant.getId(), people,
                 date);
@@ -211,18 +197,18 @@ class ReservationControllerTest {
     void testAddReservationWhenParamsAreValid() throws UserNotFound, DateTimeInThePast, TableNotFound, ReservationNotInOpenTimes, ManagerReservationNotAllowed, RestaurantNotFound, InvalidWorkingTime {
         Map<String, String> params = new HashMap<>();
         params.put("people", String.valueOf(4));
-        LocalDateTime dateTime = LocalDateTime.now();
-        params.put("datetime", dateTime.toString());
-
+        String datetimeString="2024-10-07 15:24";
+        LocalDateTime dateTime = LocalDateTime.parse(datetimeString, DATETIME_FORMATTER);
+        params.put("datetime", datetimeString);
         when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(restaurant);
         when(reserveService.reserveTable(restaurant.getId(), 4, dateTime)).thenReturn(reservation);
 
         Response response = reservationController.addReservation(restaurant.getId(), params);
 
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("reservation done", response.getMessage());
-//        assertEquals(mockReservation, response.getData());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertTrue(response.isSuccess());
+        assertEquals("reservation done", response.getMessage());
+        assertTrue(reservation.equals(response.getData()));
 
         assertNotNull(response);
 
@@ -273,8 +259,9 @@ class ReservationControllerTest {
     void testAddReservationWhenReserveTableFailed() throws DateTimeInThePast, RestaurantNotFound, UserNotFound, TableNotFound, ReservationNotInOpenTimes, ManagerReservationNotAllowed, InvalidWorkingTime {
         Map<String, String> params = new HashMap<>();
         params.put("people", String.valueOf(4));
-        LocalDateTime dateTime = LocalDateTime.now();
-        params.put("datetime", dateTime.toString());
+        String datetimeString="2024-10-07 15:24";
+        LocalDateTime dateTime = LocalDateTime.parse(datetimeString, DATETIME_FORMATTER);
+        params.put("datetime", datetimeString);
 
         when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(restaurant);
         doThrow(new RuntimeException("test")).when(reserveService).reserveTable(restaurant.getId(), 4, dateTime);
@@ -282,11 +269,6 @@ class ReservationControllerTest {
         ResponseException exception = assertThrows(ResponseException.class,
                 () -> reservationController.addReservation(restaurant.getId(), params));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertTrue(response.isSuccess());
-//        assertEquals("restaurant table reservations", response.getMessage());
-//        assertEquals(mockReservations, response.getData());
 
         verify(restaurantService).getRestaurant(restaurant.getId());
         verify(reserveService).reserveTable(restaurant.getId(), 4, dateTime);
@@ -298,7 +280,7 @@ class ReservationControllerTest {
 
         Response response = reservationController.cancelReservation(reservation.getReservationNumber());
 
-//        assertTrue(response.equals(Response.ok("reservation cancelled")));
+        assertTrue(response.getMessage().equals("reservation cancelled"));
 
         verify(reserveService).cancelReservation(reservation.getReservationNumber());
     }
@@ -310,10 +292,7 @@ class ReservationControllerTest {
         ResponseException exception = assertThrows(ResponseException.class,
                 () -> reservationController.cancelReservation(reservation.getReservationNumber()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-//        assertTrue(response.equals(Response.ok("reservation cancelled")));
 
         verify(reserveService).cancelReservation(reservation.getReservationNumber());
     }
-
-
 }

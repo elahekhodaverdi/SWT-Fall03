@@ -54,7 +54,10 @@ class ReviewControllerTest {
         Response response = reviewController.getReviews(restaurant.getId(), page);
         String message = String.format("reviews for restaurant (%d): %s", restaurant.getId(), restaurant.getName());
         assertNotNull(response);
-//        assertEquals(Boolean.TRUE, response.equals(Response.ok(message, pagedReviews)));
+        assertEquals(response.getStatus(), HttpStatus.OK);
+        assertTrue(response.getMessage().equals(message));
+        assertTrue(response.getData().equals(pagedReviews));
+        assertTrue(response.isSuccess());
 
         verify(restaurantService).getRestaurant(restaurant.getId());
         verify(reviewService).getReviews(restaurant.getId(), page);
@@ -89,8 +92,9 @@ class ReviewControllerTest {
         Response response = reviewController.addReview(restaurant.getId(), params);
         assertNotNull(response);
 
-//        assertEquals(HttpStatus.OK, response.getStatus());
-//        assertEquals("review added successfully", response.getMessage());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals("review added successfully", response.getMessage());
+        assertTrue(response.isSuccess());
 
         verify(reviewService).addReview(eq(restaurant.getId()), any(Rating.class), eq("Great food!"));
     }
@@ -127,5 +131,27 @@ class ReviewControllerTest {
 
         verify(restaurantService).getRestaurant(restaurant.getId());
         verifyNoInteractions(reviewService);
+    }
+
+    @Test
+    void testAddReviewsWhenAddReviewThrowsException() throws UserNotFound, ManagerCannotReview, UserHasNotReserved, RestaurantNotFound, InvalidReviewRating {
+        Map<String, Object> params = new HashMap<>();
+        params.put("comment", "Great food!");
+        Map<String, Number> ratingMap = new HashMap<>();
+        ratingMap.put("food", 4.5);
+        ratingMap.put("service", 4.0);
+        ratingMap.put("ambiance", 4.2);
+        ratingMap.put("overall", 4.3);
+        params.put("rating", ratingMap);
+
+        when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(restaurant);
+        doThrow(new RuntimeException("test")).when(reviewService).addReview(eq(restaurant.getId()), any(),
+                eq((String) params.get("comment")));
+
+        ResponseException exception = assertThrows(ResponseException.class,
+                () -> reviewController.addReview(restaurant.getId(), params));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+
+        verify(reviewService).addReview(eq(restaurant.getId()), any(), eq("Great food!"));
     }
 }
