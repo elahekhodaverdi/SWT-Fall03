@@ -1,4 +1,5 @@
 package mizdooni.controllers;
+
 import mizdooni.exceptions.*;
 import mizdooni.model.*;
 import mizdooni.response.Response;
@@ -45,8 +46,8 @@ class ReservationControllerTest {
         Address address = new Address("Country", "City", "Street");
         user = new User("testUser", "password123", "user@test.com", address, User.Role.client);
         User manager = new User("testManager", "password456", "manager@test.com", address, User.Role.manager);
-        restaurant = new Restaurant("Test Restaurant", manager,"Fast food", LocalTime.now(),
-                LocalTime.now().plusHours(10), "",address, "");
+        restaurant = new Restaurant("Test Restaurant", manager, "Fast food", LocalTime.now(),
+                LocalTime.now().plusHours(10), "", address, "");
         table = new Table(1, restaurant.getId(), 1);
         reservation = new Reservation(user, restaurant, table, LocalDateTime.now().plusHours(-2));
     }
@@ -67,8 +68,8 @@ class ReservationControllerTest {
         assertEquals("restaurant table reservations", response.getMessage());
         assertEquals(Collections.singletonList(reservation), response.getData());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
-        verify(reserveService).getReservations(restaurant.getId(), table.getTableNumber(),
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verify(reserveService, times(1)).getReservations(restaurant.getId(), table.getTableNumber(),
                 reservation.getDateTime().toLocalDate());
     }
 
@@ -86,7 +87,39 @@ class ReservationControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals(ControllerUtils.PARAMS_BAD_TYPE, exception.getMessage());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verifyNoInteractions(reserveService);
+    }
+
+    @Test
+    void testGetReservationsWhenDateIsMissing() {
+        when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(restaurant);
+
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> reservationController.getReservations(restaurant.getId(), table.getTableNumber(), null)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(ControllerUtils.PARAMS_BAD_TYPE, exception.getMessage());
+
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verifyNoInteractions(reserveService);
+    }
+
+    @Test
+    void testGetReservationsWhenRestaurantNotFound() {
+        when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(null);
+
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> reservationController.getReservations(restaurant.getId(), table.getTableNumber(), reservation.getDateTime().toLocalDate().toString())
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertEquals("restaurant not found", exception.getMessage());
+
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
         verifyNoInteractions(reserveService);
     }
 
@@ -101,8 +134,8 @@ class ReservationControllerTest {
                         reservation.getDateTime().toLocalDate().toString()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
-        verify(reserveService).getReservations(restaurant.getId(), table.getTableNumber(),
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verify(reserveService, times(1)).getReservations(restaurant.getId(), table.getTableNumber(),
                 reservation.getDateTime().toLocalDate());
     }
 
@@ -119,7 +152,7 @@ class ReservationControllerTest {
         assertEquals(Collections.singletonList(reservation), response.getData());
         assertNotNull(response);
 
-        verify(reserveService).getCustomerReservations(user.getId());
+        verify(reserveService, times(1)).getCustomerReservations(user.getId());
     }
 
     @Test
@@ -131,7 +164,7 @@ class ReservationControllerTest {
                 () -> reservationController.getCustomerReservations(user.getId()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-        verify(reserveService).getCustomerReservations(user.getId());
+        verify(reserveService, times(1)).getCustomerReservations(user.getId());
     }
 
     @Test
@@ -151,8 +184,8 @@ class ReservationControllerTest {
         assertEquals(availableTimes, response.getData());
         assertNotNull(response);
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
-        verify(reserveService).getAvailableTimes(restaurant.getId(), people, date);
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verify(reserveService, times(1)).getAvailableTimes(restaurant.getId(), people, date);
     }
 
     @Test
@@ -170,7 +203,7 @@ class ReservationControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals(ControllerUtils.PARAMS_BAD_TYPE, exception.getMessage());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
         verifyNoInteractions(reserveService);
     }
 
@@ -188,7 +221,7 @@ class ReservationControllerTest {
                         date.toString()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
         verify(reserveService).getAvailableTimes(restaurant.getId(), people,
                 date);
     }
@@ -197,7 +230,7 @@ class ReservationControllerTest {
     void testAddReservationWhenParamsAreValid() throws UserNotFound, DateTimeInThePast, TableNotFound, ReservationNotInOpenTimes, ManagerReservationNotAllowed, RestaurantNotFound, InvalidWorkingTime {
         Map<String, String> params = new HashMap<>();
         params.put("people", String.valueOf(4));
-        String datetimeString="2024-10-07 15:24";
+        String datetimeString = "2024-10-07 15:24";
         LocalDateTime dateTime = LocalDateTime.parse(datetimeString, DATETIME_FORMATTER);
         params.put("datetime", datetimeString);
         when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(restaurant);
@@ -212,8 +245,8 @@ class ReservationControllerTest {
 
         assertNotNull(response);
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
-        verify(reserveService).reserveTable(restaurant.getId(), 4, dateTime);
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verify(reserveService, times(1)).reserveTable(restaurant.getId(), 4, dateTime);
     }
 
     @Test
@@ -230,7 +263,7 @@ class ReservationControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals(ControllerUtils.PARAMS_MISSING, exception.getMessage());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
         verifyNoInteractions(reserveService);
     }
 
@@ -251,7 +284,7 @@ class ReservationControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals(ControllerUtils.PARAMS_BAD_TYPE, exception.getMessage());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
         verifyNoInteractions(reserveService);
     }
 
@@ -259,7 +292,7 @@ class ReservationControllerTest {
     void testAddReservationWhenReserveTableFailed() throws DateTimeInThePast, RestaurantNotFound, UserNotFound, TableNotFound, ReservationNotInOpenTimes, ManagerReservationNotAllowed, InvalidWorkingTime {
         Map<String, String> params = new HashMap<>();
         params.put("people", String.valueOf(4));
-        String datetimeString="2024-10-07 15:24";
+        String datetimeString = "2024-10-07 15:24";
         LocalDateTime dateTime = LocalDateTime.parse(datetimeString, DATETIME_FORMATTER);
         params.put("datetime", datetimeString);
 
@@ -270,8 +303,28 @@ class ReservationControllerTest {
                 () -> reservationController.addReservation(restaurant.getId(), params));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
         verify(reserveService).reserveTable(restaurant.getId(), 4, dateTime);
+    }
+
+    @Test
+    void testAddReservationWhenRestaurantNotFound() throws DateTimeInThePast, RestaurantNotFound, UserNotFound, TableNotFound, ReservationNotInOpenTimes, ManagerReservationNotAllowed, InvalidWorkingTime {
+        Map<String, String> params = new HashMap<>();
+        params.put("people", String.valueOf(4));
+        String datetimeString = "2024-10-07 15:24";
+        LocalDateTime dateTime = LocalDateTime.parse(datetimeString, DATETIME_FORMATTER);
+        params.put("datetime", datetimeString);
+
+        when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(null);
+
+        ResponseException exception = assertThrows(ResponseException.class,
+                () -> reservationController.addReservation(restaurant.getId(), params));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertEquals("restaurant not found", exception.getMessage());
+
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verifyNoInteractions(reserveService);
     }
 
     @Test
@@ -282,7 +335,7 @@ class ReservationControllerTest {
 
         assertTrue(response.getMessage().equals("reservation cancelled"));
 
-        verify(reserveService).cancelReservation(reservation.getReservationNumber());
+        verify(reserveService, times(1)).cancelReservation(reservation.getReservationNumber());
     }
 
     @Test
@@ -293,6 +346,6 @@ class ReservationControllerTest {
                 () -> reservationController.cancelReservation(reservation.getReservationNumber()));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-        verify(reserveService).cancelReservation(reservation.getReservationNumber());
+        verify(reserveService, times(1)).cancelReservation(reservation.getReservationNumber());
     }
 }
