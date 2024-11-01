@@ -1,5 +1,8 @@
 package mizdooni.controllers;
 
+import mizdooni.exceptions.DuplicatedUsernameEmail;
+import mizdooni.exceptions.InvalidEmailFormat;
+import mizdooni.exceptions.InvalidUsernameFormat;
 import mizdooni.model.Address;
 import mizdooni.model.User;
 import mizdooni.response.Response;
@@ -126,7 +129,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testSuccessfulSignup() throws Exception {
+    void testSuccessfulSignup() throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
         Map<String, Object> params = new HashMap<>();
         params.put("username", USERNAME);
         params.put("password", PASSWORD);
@@ -149,7 +152,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testMissingParamsAtSignup() throws Exception {
+    void testMissingParamsAtSignup() throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
         Map<String, Object> params = new HashMap<>();
         params.put("username", USERNAME);
         params.put("password", "");
@@ -170,7 +173,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testBadTypeParamsAtSignup() throws Exception {
+    void testBadTypeParamsAtSignup() throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
         Map<String, Object> params = new HashMap<>();
         params.put("username", USERNAME);
         params.put("password", PASSWORD);
@@ -192,7 +195,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testThrowExceptionWhileSignup() throws Exception {
+    void testThrowExceptionWhileSignup() throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
         Map<String, Object> params = new HashMap<>();
         params.put("username", USERNAME);
         params.put("password", PASSWORD);
@@ -225,7 +228,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testLogoutWithNoUserLoggedIn() throws Exception {
+    void testLogoutWithNoUserLoggedIn() {
         when(userService.logout()).thenReturn(false);
 
         ResponseException exception = assertThrows(ResponseException.class, () -> {
@@ -239,7 +242,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testAvailableUsername() throws Exception {
+    void testAvailableUsername() {
         try (MockedStatic<ServiceUtils> utilities = mockStatic(ServiceUtils.class)) {
             utilities.when(() -> ServiceUtils.validateUsername(USERNAME)).thenReturn(true);
             when(userService.usernameExists(USERNAME)).thenReturn(false);
@@ -253,7 +256,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testInvalidUsername() throws Exception {
+    void testInvalidUsername() {
         try (MockedStatic<ServiceUtils> utilities = mockStatic(ServiceUtils.class)) {
             utilities.when(() -> ServiceUtils.validateUsername(USERNAME)).thenReturn(false);
 
