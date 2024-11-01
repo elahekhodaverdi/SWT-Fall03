@@ -59,8 +59,8 @@ class ReviewControllerTest {
         assertTrue(response.getData().equals(pagedReviews));
         assertTrue(response.isSuccess());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
-        verify(reviewService).getReviews(restaurant.getId(), page);
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verify(reviewService, times(1)).getReviews(restaurant.getId(), page);
     }
 
     @Test
@@ -72,8 +72,24 @@ class ReviewControllerTest {
         ResponseException exception = assertThrows(ResponseException.class,
                 () -> reviewController.getReviews(restaurant.getId(), page));
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
         verifyNoInteractions(reviewService);
+    }
+
+    @Test
+    void testGetReviewsWhenGetReviewsFails() throws RestaurantNotFound {
+        int page = 1;
+
+        PagedList<Review> pagedReviews = new PagedList<>(Collections.emptyList(), page, 10);
+        when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(restaurant);
+        doThrow(new RuntimeException("test")).when(reviewService).getReviews(restaurant.getId(), page);
+
+        ResponseException exception = assertThrows(ResponseException.class,
+                () -> reviewController.getReviews(restaurant.getId(), page));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verify(reviewService, times(1)).getReviews(restaurant.getId(), page);
     }
 
     @Test
@@ -96,7 +112,8 @@ class ReviewControllerTest {
         assertEquals("review added successfully", response.getMessage());
         assertTrue(response.isSuccess());
 
-        verify(reviewService).addReview(eq(restaurant.getId()), any(Rating.class), eq("Great food!"));
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verify(reviewService,times(1)).addReview(eq(restaurant.getId()), any(Rating.class), eq("Great food!"));
     }
 
     @Test
@@ -111,7 +128,7 @@ class ReviewControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals(ControllerUtils.PARAMS_MISSING, exception.getMessage());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService,times(1)).getRestaurant(restaurant.getId());
         verifyNoInteractions(reviewService);
     }
 
@@ -129,7 +146,7 @@ class ReviewControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals(ControllerUtils.PARAMS_BAD_TYPE, exception.getMessage());
 
-        verify(restaurantService).getRestaurant(restaurant.getId());
+        verify(restaurantService,times(1)).getRestaurant(restaurant.getId());
         verifyNoInteractions(reviewService);
     }
 
@@ -152,6 +169,27 @@ class ReviewControllerTest {
                 () -> reviewController.addReview(restaurant.getId(), params));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
-        verify(reviewService).addReview(eq(restaurant.getId()), any(), eq("Great food!"));
+        verify(reviewService,times(1)).addReview(eq(restaurant.getId()), any(), eq("Great food!"));
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+    }
+
+    @Test
+    void testAddReviewsWhenRestaurantNotFound() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("comment", "Great food!");
+        Map<String, Number> ratingMap = new HashMap<>();
+        ratingMap.put("food", 4.5);
+        ratingMap.put("service", 4.0);
+        ratingMap.put("ambiance", 4.2);
+        ratingMap.put("overall", 4.3);
+        params.put("rating", ratingMap);
+
+        when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(null);
+
+        ResponseException exception = assertThrows(ResponseException.class,
+                () -> reviewController.addReview(restaurant.getId(), params));
+
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verifyNoInteractions(reviewService);
     }
 }

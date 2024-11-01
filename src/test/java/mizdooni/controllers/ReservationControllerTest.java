@@ -227,6 +227,23 @@ class ReservationControllerTest {
     }
 
     @Test
+    void testGetAvailableTimesWhenRestaurantNotFound() {
+        int people = 4;
+        LocalDate date = LocalDate.of(2003, 1, 17);
+
+        when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(null);
+
+        ResponseException exception = assertThrows(ResponseException.class,
+                () -> reservationController.getAvailableTimes(restaurant.getId(), people,
+                        date.toString()));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertEquals("restaurant not found", exception.getMessage());
+
+        verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
+        verifyNoInteractions(reserveService);
+    }
+
+    @Test
     void testAddReservationWhenParamsAreValid() throws UserNotFound, DateTimeInThePast, TableNotFound, ReservationNotInOpenTimes, ManagerReservationNotAllowed, RestaurantNotFound, InvalidWorkingTime {
         Map<String, String> params = new HashMap<>();
         params.put("people", String.valueOf(4));
