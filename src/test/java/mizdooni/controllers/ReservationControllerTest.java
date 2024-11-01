@@ -16,10 +16,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static mizdooni.controllers.ControllerUtils.DATETIME_FORMATTER;
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,19 +89,25 @@ class ReservationControllerTest {
     }
 
     @Test
-    void testGetReservationsWhenDateIsMissing() {
+    void testGetReservationsWhenDateIsMissing() throws UserNotManager, TableNotFound, InvalidManagerRestaurant, RestaurantNotFound {
+        List<Reservation> reservations = new ArrayList<>();
+        reservations.add(new Reservation(user, restaurant, table, LocalDateTime.now().plusHours(-4)));
+        reservations.add(new Reservation(user, restaurant, table, LocalDateTime.now().plusHours(-6)));
+
+        when(reserveService.getReservations(restaurant.getId(), table.getTableNumber(), null))
+                .thenReturn(reservations);
         when(restaurantService.getRestaurant(restaurant.getId())).thenReturn(restaurant);
 
-        ResponseException exception = assertThrows(
-                ResponseException.class,
-                () -> reservationController.getReservations(restaurant.getId(), table.getTableNumber(), null)
-        );
+        Response response = reservationController.getReservations(restaurant.getId(), table.getTableNumber(), null);
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals(ControllerUtils.PARAMS_BAD_TYPE, exception.getMessage());
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertTrue(response.isSuccess());
+        assertEquals("restaurant table reservations", response.getMessage());
+        assertEquals(reservations, response.getData());
 
         verify(restaurantService, times(1)).getRestaurant(restaurant.getId());
-        verifyNoInteractions(reserveService);
+        verify(reserveService, times(1)).getReservations(restaurant.getId(), table.getTableNumber(), null);
     }
 
     @Test
