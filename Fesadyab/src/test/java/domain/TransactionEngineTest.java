@@ -17,20 +17,20 @@ class TransactionEngineTest {
 
 
     private Transaction createTransaction(int transactionId, int accountId, int amount, boolean isDebit) {
-        return new Transaction() {{
-            setTransactionId(transactionId);
-            setAccountId(accountId);
-            setAmount(amount);
-            setDebit(isDebit);
-        }};
+        Transaction transaction = new Transaction();
+        transaction.setTransactionId(transactionId);
+        transaction.setAccountId(accountId);
+        transaction.setAmount(amount);
+        transaction.setDebit(isDebit);
+        return transaction;
     }
 
     private Transaction createTransaction(int transactionId, int accountId, int amount) {
-        return new Transaction() {{
-            setTransactionId(transactionId);
-            setAccountId(accountId);
-            setAmount(amount);
-        }};
+        Transaction transaction = new Transaction();
+        transaction.setTransactionId(transactionId);
+        transaction.setAccountId(accountId);
+        transaction.setAmount(amount);
+        return transaction;
     }
 
     @BeforeEach
@@ -88,7 +88,7 @@ class TransactionEngineTest {
         engine.transactionHistory = new ArrayList<>(List.of(
                 createTransaction(1, 1, 150),
                 createTransaction(2, 1, 250),
-                createTransaction(3, 1, 500)
+                createTransaction(3, 2, 500)
         ));
         int result = engine.getAverageTransactionAmountByAccount(1);
 
