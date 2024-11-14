@@ -142,6 +142,21 @@ class TransactionEngineTest {
     @DisplayName("Test add transaction and detect fraud with fraudulent transaction")
     void testAddTransactionAndDetectFraudWithFraudulentTransaction() {
         engine.transactionHistory = new ArrayList<>(List.of(
+                createTransaction(1, 1, 1000),
+                createTransaction(2, 1, 1500)
+        ));
+
+        Transaction txn = createTransaction(3, 1, 2000, true);
+        int fraudScore = engine.addTransactionAndDetectFraud(txn);
+
+        assertEquals(500, fraudScore);
+        assertEquals(3, engine.transactionHistory.size());
+    }
+
+    @Test
+    @DisplayName("Test add transaction and detect fraud with not fraudulent transaction, returns pattern")
+    void testAddTransactionAndDetectFraudWithNotFraudulentTransaction() {
+        engine.transactionHistory = new ArrayList<>(List.of(
                 createTransaction(1, 1, 150),
                 createTransaction(2, 1, 250)
         ));
@@ -162,77 +177,70 @@ class TransactionEngineTest {
     @Test
     @DisplayName("test transaction pattern with all transaction below the threshold")
     public void testTransactionPatternWithAllTransactionsBelowTheThreshold() {
-        Transaction transaction = createTransaction(1,1,100);
-        Transaction transaction2 = createTransaction(2,2,200);
-        Transaction transaction3 = createTransaction(3,3,300);
-        engine.transactionHistory.add(transaction);
-        engine.transactionHistory.add(transaction2);
-        engine.transactionHistory.add(transaction3);
+        engine.transactionHistory = new ArrayList<>(List.of(
+                createTransaction(1, 1, 100),
+                createTransaction(2, 2, 200),
+                createTransaction(3, 3, 300)
+        ));
+
         assertEquals(0, engine.getTransactionPatternAboveThreshold(400));
     }
 
     @Test
     @DisplayName("test transaction pattern with all transaction below the threshold")
     public void testTransactionPatternWithTransactionsEqualToTheThreshold() {
-        Transaction transaction = createTransaction(1,1,300);
-        Transaction transaction2 = createTransaction(2,2,300);
-        Transaction transaction3 = createTransaction(3,3,300);
-        engine.transactionHistory.add(transaction);
-        engine.transactionHistory.add(transaction2);
-        engine.transactionHistory.add(transaction3);
+        engine.transactionHistory = new ArrayList<>(List.of(
+                createTransaction(1, 1, 300),
+                createTransaction(2, 2, 300),
+                createTransaction(3, 3, 300)
+        ));
         assertEquals(0, engine.getTransactionPatternAboveThreshold(300));
     }
 
     @Test
     @DisplayName("test transaction pattern with no consistent pattern")
     public void testTransactionPatternWithNoPattern() {
-        Transaction transaction = createTransaction(1,1,10);
-        Transaction transaction2 = createTransaction(2,2,20);
-        Transaction transaction3 = createTransaction(2,2,30);
-        Transaction transaction4 = createTransaction(3,3,50);
-        engine.transactionHistory.add(transaction);
-        engine.transactionHistory.add(transaction2);
-        engine.transactionHistory.add(transaction3);
-        engine.transactionHistory.add(transaction4);
+        engine.transactionHistory = new ArrayList<>(List.of(
+                createTransaction(1, 1, 10),
+                createTransaction(2, 2, 20),
+                createTransaction(2, 2, 30),
+                createTransaction(3, 3, 50)
+        ));
         assertEquals(0, engine.getTransactionPatternAboveThreshold(5));
     }
 
     @Test
     @DisplayName("Test transaction pattern with a consistent ascending pattern")
     public void testTransactionPatternWithAscendingPattern() {
-        Transaction transaction = createTransaction(1,1,10);
-        Transaction transaction2 = createTransaction(2,2,20);
-        Transaction transaction3 = createTransaction(3,3,30);
-        engine.transactionHistory.add(transaction);
-        engine.transactionHistory.add(transaction2);
-        engine.transactionHistory.add(transaction3);
+        engine.transactionHistory = new ArrayList<>(List.of(
+                createTransaction(1, 1, 10),
+                createTransaction(2, 2, 20),
+                createTransaction(3, 3, 30)
+        ));
         assertEquals(10, engine.getTransactionPatternAboveThreshold(5));
     }
 
     @Test
     @DisplayName("Test transaction pattern with a consistent descending pattern")
     public void testTransactionPatternWithDescendingPattern() {
-        Transaction transaction = createTransaction(1,1,30);
-        Transaction transaction2 = createTransaction(2,2,20);
-        Transaction transaction3 = createTransaction(3,3,10);
-        engine.transactionHistory.add(transaction);
-        engine.transactionHistory.add(transaction2);
-        engine.transactionHistory.add(transaction3);
-        assertEquals(10, engine.getTransactionPatternAboveThreshold(5));
+        engine.transactionHistory = new ArrayList<>(List.of(
+                createTransaction(1, 1, 30),
+                createTransaction(2, 2, 20),
+                createTransaction(3, 3, 10)
+        ));
+        assertEquals(-10, engine.getTransactionPatternAboveThreshold(5));
     }
 
     @Test
     @DisplayName("Test transaction pattern with a consistent mixed Descending and Ascending pattern")
     public void testTransactionPatternWithMixedDescendingAndAscendingPattern() {
-        Transaction transaction = createTransaction(1,1,30);
-        Transaction transaction2 = createTransaction(2,2,40);
-        Transaction transaction3 = createTransaction(3,3,30);
-        engine.transactionHistory.add(transaction);
-        engine.transactionHistory.add(transaction2);
-        engine.transactionHistory.add(transaction3);
+        engine.transactionHistory = new ArrayList<>(List.of(
+                createTransaction(1, 1, 30),
+                createTransaction(2, 2, 40),
+                createTransaction(3, 3, 30)
+        ));
         assertEquals(0, engine.getTransactionPatternAboveThreshold(5));
     }
-
 
 
 }
