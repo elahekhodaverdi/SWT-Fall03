@@ -152,4 +152,87 @@ class TransactionEngineTest {
         assertEquals(100, fraudScore);
         assertEquals(3, engine.transactionHistory.size());
     }
+
+    @Test
+    @DisplayName("test transaction pattern, when the history is empty")
+    public void testTransactionPatternWhenHistoryIsEmpty() {
+        assertEquals(0, engine.getTransactionPatternAboveThreshold(100));
+    }
+
+    @Test
+    @DisplayName("test transaction pattern with all transaction below the threshold")
+    public void testTransactionPatternWithAllTransactionsBelowTheThreshold() {
+        Transaction transaction = createTransaction(1,1,100);
+        Transaction transaction2 = createTransaction(2,2,200);
+        Transaction transaction3 = createTransaction(3,3,300);
+        engine.transactionHistory.add(transaction);
+        engine.transactionHistory.add(transaction2);
+        engine.transactionHistory.add(transaction3);
+        assertEquals(0, engine.getTransactionPatternAboveThreshold(400));
+    }
+
+    @Test
+    @DisplayName("test transaction pattern with all transaction below the threshold")
+    public void testTransactionPatternWithTransactionsEqualToTheThreshold() {
+        Transaction transaction = createTransaction(1,1,300);
+        Transaction transaction2 = createTransaction(2,2,300);
+        Transaction transaction3 = createTransaction(3,3,300);
+        engine.transactionHistory.add(transaction);
+        engine.transactionHistory.add(transaction2);
+        engine.transactionHistory.add(transaction3);
+        assertEquals(0, engine.getTransactionPatternAboveThreshold(300));
+    }
+
+    @Test
+    @DisplayName("test transaction pattern with no consistent pattern")
+    public void testTransactionPatternWithNoPattern() {
+        Transaction transaction = createTransaction(1,1,10);
+        Transaction transaction2 = createTransaction(2,2,20);
+        Transaction transaction3 = createTransaction(2,2,30);
+        Transaction transaction4 = createTransaction(3,3,50);
+        engine.transactionHistory.add(transaction);
+        engine.transactionHistory.add(transaction2);
+        engine.transactionHistory.add(transaction3);
+        engine.transactionHistory.add(transaction4);
+        assertEquals(0, engine.getTransactionPatternAboveThreshold(5));
+    }
+
+    @Test
+    @DisplayName("Test transaction pattern with a consistent ascending pattern")
+    public void testTransactionPatternWithAscendingPattern() {
+        Transaction transaction = createTransaction(1,1,10);
+        Transaction transaction2 = createTransaction(2,2,20);
+        Transaction transaction3 = createTransaction(3,3,30);
+        engine.transactionHistory.add(transaction);
+        engine.transactionHistory.add(transaction2);
+        engine.transactionHistory.add(transaction3);
+        assertEquals(10, engine.getTransactionPatternAboveThreshold(5));
+    }
+
+    @Test
+    @DisplayName("Test transaction pattern with a consistent descending pattern")
+    public void testTransactionPatternWithDescendingPattern() {
+        Transaction transaction = createTransaction(1,1,30);
+        Transaction transaction2 = createTransaction(2,2,20);
+        Transaction transaction3 = createTransaction(3,3,10);
+        engine.transactionHistory.add(transaction);
+        engine.transactionHistory.add(transaction2);
+        engine.transactionHistory.add(transaction3);
+        assertEquals(10, engine.getTransactionPatternAboveThreshold(5));
+    }
+
+    @Test
+    @DisplayName("Test transaction pattern with a consistent mixed Descending and Ascending pattern")
+    public void testTransactionPatternWithMixedDescendingAndAscendingPattern() {
+        Transaction transaction = createTransaction(1,1,30);
+        Transaction transaction2 = createTransaction(2,2,40);
+        Transaction transaction3 = createTransaction(3,3,30);
+        engine.transactionHistory.add(transaction);
+        engine.transactionHistory.add(transaction2);
+        engine.transactionHistory.add(transaction3);
+        assertEquals(0, engine.getTransactionPatternAboveThreshold(5));
+    }
+
+
+
 }
