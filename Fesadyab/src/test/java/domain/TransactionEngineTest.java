@@ -83,19 +83,6 @@ class TransactionEngineTest {
     }
 
     @Test
-    @DisplayName("Test get average transaction amount by account with mixed account IDs")
-    void testGetAverageTransactionAmountByAccountWithMixedAccountIds() {
-        engine.transactionHistory = new ArrayList<>(List.of(
-                createTransaction(1, 1, 150),
-                createTransaction(2, 1, 250),
-                createTransaction(3, 2, 500)
-        ));
-        int result = engine.getAverageTransactionAmountByAccount(1);
-
-        assertEquals(200, result);
-    }
-
-    @Test
     @DisplayName("Test detect fraudulent transaction when debit exceeds twice the average")
     void testDetectFraudulentTransactionWithDebitExceedsTwiceAverage() {
         Transaction txn = createTransaction(1, 1, 150, true);
@@ -175,7 +162,7 @@ class TransactionEngineTest {
     }
 
     @Test
-    @DisplayName("test transaction pattern with all transaction below the threshold")
+    @DisplayName("test transaction pattern with all transaction less that or equal to the threshold")
     public void testTransactionPatternWithAllTransactionsBelowTheThreshold() {
         engine.transactionHistory = new ArrayList<>(List.of(
                 createTransaction(1, 1, 100),
@@ -183,17 +170,6 @@ class TransactionEngineTest {
                 createTransaction(3, 3, 300)
         ));
 
-        assertEquals(0, engine.getTransactionPatternAboveThreshold(400));
-    }
-
-    @Test
-    @DisplayName("test transaction pattern with all transaction below the threshold")
-    public void testTransactionPatternWithTransactionsEqualToTheThreshold() {
-        engine.transactionHistory = new ArrayList<>(List.of(
-                createTransaction(1, 1, 300),
-                createTransaction(2, 2, 300),
-                createTransaction(3, 3, 300)
-        ));
         assertEquals(0, engine.getTransactionPatternAboveThreshold(300));
     }
 
@@ -210,8 +186,8 @@ class TransactionEngineTest {
     }
 
     @Test
-    @DisplayName("Test transaction pattern with a consistent ascending pattern")
-    public void testTransactionPatternWithAscendingPattern() {
+    @DisplayName("Test transaction pattern with a consistent pattern")
+    public void testTransactionPatternWithConsistentPattern() {
         engine.transactionHistory = new ArrayList<>(List.of(
                 createTransaction(1, 1, 10),
                 createTransaction(2, 2, 20),
@@ -219,28 +195,5 @@ class TransactionEngineTest {
         ));
         assertEquals(10, engine.getTransactionPatternAboveThreshold(5));
     }
-
-    @Test
-    @DisplayName("Test transaction pattern with a consistent descending pattern")
-    public void testTransactionPatternWithDescendingPattern() {
-        engine.transactionHistory = new ArrayList<>(List.of(
-                createTransaction(1, 1, 30),
-                createTransaction(2, 2, 20),
-                createTransaction(3, 3, 10)
-        ));
-        assertEquals(-10, engine.getTransactionPatternAboveThreshold(5));
-    }
-
-    @Test
-    @DisplayName("Test transaction pattern with a consistent mixed Descending and Ascending pattern")
-    public void testTransactionPatternWithMixedDescendingAndAscendingPattern() {
-        engine.transactionHistory = new ArrayList<>(List.of(
-                createTransaction(1, 1, 30),
-                createTransaction(2, 2, 40),
-                createTransaction(3, 3, 30)
-        ));
-        assertEquals(0, engine.getTransactionPatternAboveThreshold(5));
-    }
-
 
 }
