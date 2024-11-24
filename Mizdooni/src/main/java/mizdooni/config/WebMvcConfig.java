@@ -3,12 +3,14 @@ package mizdooni.config;
 import mizdooni.filters.AuthInterceptor;
 import mizdooni.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@ComponentScan(basePackages = "mizdooni")
 public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     UserService userService;
