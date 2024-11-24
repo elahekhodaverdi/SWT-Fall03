@@ -1,6 +1,9 @@
 package mizdooni.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import mizdooni.exceptions.DuplicatedRestaurantName;
+import mizdooni.exceptions.InvalidWorkingTime;
+import mizdooni.exceptions.UserNotManager;
 import mizdooni.model.Address;
 import mizdooni.model.Restaurant;
 import mizdooni.response.PagedList;
@@ -12,21 +15,27 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalTime;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import static mizdooni.controllers.ControllerUtils.PARAMS_BAD_TYPE;
+import static mizdooni.controllers.ControllerUtils.PARAMS_MISSING;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(RestaurantController.class)
@@ -64,7 +73,7 @@ class RestaurantControllerTest {
 
     @Test
     void testGetRestaurantWhenRestaurantExists() throws Exception {
-        when(restaurantService.getRestaurant(Mockito.anyInt())).thenReturn(sampleRestaurant);
+        when(restaurantService.getRestaurant(Mockito.anyInt())).thenReturn();
 
         mockMvc.perform(get("/restaurants/{restaurantId}", 1))
                 .andExpect(status().isOk())
@@ -104,7 +113,7 @@ class RestaurantControllerTest {
     }
 
     @Test
-    void testGetRestaurantsWhenBadRequestAccured() throws Exception {
+    void testGetRestaurantsWhenBadRequest() throws Exception {
         List<Restaurant> restaurantList = Collections.singletonList(sampleRestaurant);
 
         when(restaurantService.getRestaurants(1, null)).thenReturn(new PagedList<>(restaurantList, 1, 12));
@@ -127,20 +136,142 @@ class RestaurantControllerTest {
         when(restaurantService.addRestaurant(
                 Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(LocalTime.class),
-                Mockito.any(LocalTime.class),
+                Mockito.any(),
+                Mockito.any(),
                 Mockito.anyString(),
-                Mockito.any(Address.class),
+                Mockito.any(),
                 Mockito.anyString()
         )).thenReturn(1);
 
         mockMvc.perform(post("/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .contentType(objectMapper.writeValueAsString(requestParams)))
+                        .content(objectMapper.writeValueAsString(requestParams)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("restaurant added"))
                 .andExpect(jsonPath("$.data").value(1));
     }
+
+    @Test
+    void testAddRestaurantWithMissingParameter() throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "22:00");
+        requestParams.put("description", "Test Description");
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(PARAMS_MISSING));
+    }
+
+    @Test
+    void testAddRestaurantWithMissingAddressParameters() throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "22:00");
+        requestParams.put("description", "Test Description");
+        requestParams.put("address", Map.of("country", "Country", "city", "City", "street", ""));
+        requestParams.put("image", "/sample-image.jpg");
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(PARAMS_MISSING));
+    }
+
+    @Test
+    void testAddRestaurantWithBadParameter() throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "");
+        requestParams.put("description", "Test Description");
+        requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(PARAMS_BAD_TYPE));
+    }
+
+    @Test
+    void testAddRestaurantWhenRestaurantAlreadyExists() throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "22:00");
+        requestParams.put("description", "Test Description");
+        requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
+        doThrow(new DuplicatedRestaurantName()).when(restaurantService).addRestaurant(Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.anyString());
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testAddRestaurantWhenUserIsNotManager() throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "22:00");
+        requestParams.put("description", "Test Description");
+        requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
+        doThrow(new UserNotManager()).when(restaurantService).addRestaurant(Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.anyString());
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testAddRestaurantWhenWorkingTimeIsNotValid() throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "22:00");
+        requestParams.put("description", "Test Description");
+        requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
+        doThrow(new InvalidWorkingTime()).when(restaurantService).addRestaurant(Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.anyString());
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest());
+    }
+
+
 
 
 }
