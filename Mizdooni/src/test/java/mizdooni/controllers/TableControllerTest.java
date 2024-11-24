@@ -147,7 +147,7 @@ public class TableControllerTest {
     }
 
     @Test
-    void testAddTableWhenUserIsNotRestaurantManager() throws Exception {
+    void testAddTableWhenUserIsNotRestaurantManager() throws Exception {    
         Map<String, String> params = new HashMap<>();
         params.put("seatsNumber", "4");
         when(restaurantService.getRestaurant(Mockito.anyInt())).thenReturn(restaurant);
