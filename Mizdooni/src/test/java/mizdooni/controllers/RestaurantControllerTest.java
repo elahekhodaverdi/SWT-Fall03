@@ -15,27 +15,25 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalTime;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static mizdooni.controllers.ControllerUtils.PARAMS_BAD_TYPE;
 import static mizdooni.controllers.ControllerUtils.PARAMS_MISSING;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.LocalTime;
-import java.util.Collections;
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(RestaurantController.class)
@@ -56,7 +54,7 @@ class RestaurantControllerTest {
     private Restaurant getAnonymousRestaurant() {
         return new Restaurant(
                 "Test",
-                null, // Manager will be mocked or set in specific tests
+                null,
                 "Fast Food",
                 LocalTime.of(9, 0),
                 LocalTime.of(22, 0),
@@ -73,7 +71,7 @@ class RestaurantControllerTest {
 
     @Test
     void testGetRestaurantWhenRestaurantExists() throws Exception {
-        when(restaurantService.getRestaurant(Mockito.anyInt())).thenReturn();
+        when(restaurantService.getRestaurant(Mockito.anyInt())).thenReturn(sampleRestaurant);
 
         mockMvc.perform(get("/restaurants/{restaurantId}", 1))
                 .andExpect(status().isOk())
@@ -136,10 +134,10 @@ class RestaurantControllerTest {
         when(restaurantService.addRestaurant(
                 Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any(),
+                any(),
+                any(),
                 Mockito.anyString(),
-                Mockito.any(),
+                any(),
                 Mockito.anyString()
         )).thenReturn(1);
 
@@ -213,10 +211,10 @@ class RestaurantControllerTest {
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
         doThrow(new DuplicatedRestaurantName()).when(restaurantService).addRestaurant(Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any(),
+                any(),
+                any(),
                 Mockito.anyString(),
-                Mockito.any(),
+                any(),
                 Mockito.anyString());
 
         mockMvc.perform(post("/restaurants")
@@ -236,10 +234,10 @@ class RestaurantControllerTest {
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
         doThrow(new UserNotManager()).when(restaurantService).addRestaurant(Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any(),
+                any(),
+                any(),
                 Mockito.anyString(),
-                Mockito.any(),
+                any(),
                 Mockito.anyString());
 
         mockMvc.perform(post("/restaurants")
@@ -259,10 +257,10 @@ class RestaurantControllerTest {
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
         doThrow(new InvalidWorkingTime()).when(restaurantService).addRestaurant(Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any(),
+                any(),
+                any(),
                 Mockito.anyString(),
-                Mockito.any(),
+                any(),
                 Mockito.anyString());
 
         mockMvc.perform(post("/restaurants")
@@ -271,7 +269,25 @@ class RestaurantControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void testValidateRestaurantNameWhenIsAvailable() throws Exception {
+        when(restaurantService.restaurantExists(any())).thenReturn(false);
 
+        mockMvc.perform(get("/restaurants")
+                        .param("data", "any-name"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("restaurant name is available"));
+    }
+
+    @Test
+    void testValidateRestaurantNameIsTaken() throws Exception {
+        when(restaurantService.restaurantExists(any())).thenReturn(false);
+
+        mockMvc.perform(get("/restaurants")
+                        .param("data", "any-name"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("restaurant name is taken"));
+    }
 
 
 }
