@@ -2,7 +2,6 @@ package mizdooni.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mizdooni.exceptions.DuplicatedRestaurantName;
-import mizdooni.exceptions.InvalidManagerRestaurant;
 import mizdooni.exceptions.InvalidWorkingTime;
 import mizdooni.exceptions.UserNotManager;
 import mizdooni.model.Address;
@@ -13,6 +12,9 @@ import mizdooni.service.RestaurantService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,31 +90,32 @@ class RestaurantControllerTest {
                 .andExpect(jsonPath("$.message").value("restaurant not found"));
     }
 
-//    @Test
-//    void testGetRestaurantsWithoutFilter() throws Exception {
-//        List<Restaurant> restaurantList = Collections.singletonList(sampleRestaurant);
-//        when(restaurantService.getRestaurants(1, null)).thenReturn(new PagedList<>(restaurantList, 1, 12));
-//        mockMvc.perform(get("/restaurants")
-//                        .param("page", "1"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.message").value("restaurants listed"));
-//    }
-//
-//    @Test
-//    void testGetRestaurantsWithFilter() throws Exception {
-//        List<Restaurant> restaurantList = Collections.singletonList(sampleRestaurant);
-//
-//        when(restaurantService.getRestaurants(1, null)).thenReturn(new PagedList<>(restaurantList, 1, 12));
-//        mockMvc.perform(get("/restaurants")
-//                        .param("page", "1"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.message").value("restaurants listed"));
-//    }
+    @Test
+    void testGetRestaurantsWithoutFilter() throws Exception {
+        List<Restaurant> restaurantList = Collections.singletonList(sampleRestaurant);
+        when(restaurantService.getRestaurants(eq(1), any(RestaurantSearchFilter.class))).thenReturn(new PagedList<>(restaurantList, 1, 12));
+        mockMvc.perform(get("/restaurants")
+                        .param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("restaurants listed"))
+                .andExpect(jsonPath("$.data.pageList[0].name").value("Test"))
+                .andExpect(jsonPath("$.data.pageList[0].type").value("Fast Food"))
+                .andExpect(jsonPath("$.data.pageList[0].description").value("Test Description"));
+    }
+
+    @Test
+    void testGetRestaurantsWithFilter() throws Exception {
+        when(restaurantService.getRestaurants(eq(1), any(RestaurantSearchFilter.class))).thenReturn(null);
+        mockMvc.perform(get("/restaurants")
+                        .param("page", "1")
+                        .param("type", "Irani"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("restaurants listed"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
 
     @Test
     void testGetRestaurantsWhenBadRequest() throws Exception {
-        List<Restaurant> restaurantList = Collections.singletonList(sampleRestaurant);
-
         when(restaurantService.getRestaurants(eq(1), any(RestaurantSearchFilter.class)))
                 .thenThrow(new RuntimeException("test"));
 
@@ -122,8 +125,9 @@ class RestaurantControllerTest {
                 .andExpect(jsonPath("$.message").value("test"));
     }
 
-    @Test
-    void testAddRestaurantSuccessfully() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testAddRestaurantSuccessfullyWithOrWithoutImage(boolean includeImage) throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
         requestParams.put("type", "Fast Food");
@@ -131,17 +135,27 @@ class RestaurantControllerTest {
         requestParams.put("endTime", "22:00");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
-        requestParams.put("image", "/sample-image.jpg");
+
+        if (includeImage) {
+            requestParams.put("image", "/sample-image.jpg");
+        }
 
         when(restaurantService.addRestaurant(
-                Mockito.anyString(),
-                Mockito.anyString(),
+                eq("Test"),
+                eq("Fast Food"),
                 any(),
                 any(),
-                Mockito.anyString(),
+                eq("Test Description"),
                 any(),
-                Mockito.anyString()
+                eq(includeImage ? "/sample-image.jpg" : ControllerUtils.PLACEHOLDER_IMAGE)
         )).thenReturn(1);
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("restaurant added"))
+                .andExpect(jsonPath("$.data").value(1));
 
         mockMvc.perform(post("/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,49 +165,75 @@ class RestaurantControllerTest {
                 .andExpect(jsonPath("$.data").value(1));
     }
 
-    @Test
-    void testAddRestaurantWithMissingParameter() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"name", "type", "startTime", "endTime", "description", "address"})
+    void testAddRestaurantWithMissingParameter(String missingParam) throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
         requestParams.put("type", "Fast Food");
         requestParams.put("startTime", "09:00");
         requestParams.put("endTime", "22:00");
-        requestParams.put("description", "Test Description");
-
-        mockMvc.perform(post("/restaurants")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestParams)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(PARAMS_MISSING));
-    }
-
-    @Test
-    void testAddRestaurantWithMissingAddressParameters() throws Exception {
-        Map<String, Object> requestParams = new HashMap<>();
-        requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
-        requestParams.put("description", "Test Description");
-        requestParams.put("address", Map.of("country", "Country", "city", "City", "street", ""));
-        requestParams.put("image", "/sample-image.jpg");
-
-        mockMvc.perform(post("/restaurants")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestParams)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(PARAMS_MISSING));
-    }
-
-    @Test
-    void testAddRestaurantWithBadParameter() throws Exception {
-        Map<String, Object> requestParams = new HashMap<>();
-        requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
+
+        requestParams.remove(missingParam);
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(PARAMS_MISSING));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "country, empty",
+            "city, empty",
+            "street, empty",
+            "country, missing",
+            "city, missing",
+            "street, missing"
+    })
+    void testAddRestaurantWithMissingAddressParameters(String field, String scenario) throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "22:00");
+        requestParams.put("description", "Test Description");
+
+        Map<String, String> addressParams = new HashMap<>();
+        addressParams.put("country", "Country");
+        addressParams.put("city", "City");
+        addressParams.put("street", "Street");
+
+        if ("empty".equals(scenario)) {
+            addressParams.put(field, "");
+        } else if ("missing".equals(scenario)) {
+            addressParams.remove(field);
+        }
+
+        requestParams.put("address", addressParams);
+
+        mockMvc.perform(post("/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestParams)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(PARAMS_MISSING));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"startTime", "endTime"})
+    void testAddRestaurantWithBadParameter(String timeField) throws Exception {
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("name", "Test");
+        requestParams.put("type", "Fast Food");
+        requestParams.put("startTime", "09:00");
+        requestParams.put("endTime", "22:00");
+        requestParams.put("description", "Test Description");
+        requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
+
+        requestParams.put(timeField, "invalid-time");
 
         mockMvc.perform(post("/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
