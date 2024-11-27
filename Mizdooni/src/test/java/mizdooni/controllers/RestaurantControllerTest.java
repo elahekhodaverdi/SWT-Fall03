@@ -57,9 +57,9 @@ class RestaurantControllerTest {
         return new Restaurant(
                 "Test",
                 null,
-                "Fast Food",
-                LocalTime.of(9, 0),
-                LocalTime.of(22, 0),
+                "Food Type",
+                LocalTime.of(7, 0),
+                LocalTime.of(19, 0),
                 "Test Description",
                 new Address("Country", "City", "Street"),
                 "/sample-image.jpg"
@@ -99,7 +99,7 @@ class RestaurantControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("restaurants listed"))
                 .andExpect(jsonPath("$.data.pageList[0].name").value("Test"))
-                .andExpect(jsonPath("$.data.pageList[0].type").value("Fast Food"))
+                .andExpect(jsonPath("$.data.pageList[0].type").value("Food Type"))
                 .andExpect(jsonPath("$.data.pageList[0].description").value("Test Description"));
     }
 
@@ -130,9 +130,9 @@ class RestaurantControllerTest {
     void testAddRestaurantSuccessfullyWithOrWithoutImage(boolean includeImage) throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
+        requestParams.put("type", "Food Type");
+        requestParams.put("startTime", "07:00");
+        requestParams.put("endTime", "19:00");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
 
@@ -142,7 +142,7 @@ class RestaurantControllerTest {
 
         when(restaurantService.addRestaurant(
                 eq("Test"),
-                eq("Fast Food"),
+                eq("Food Type"),
                 any(),
                 any(),
                 eq("Test Description"),
@@ -170,9 +170,9 @@ class RestaurantControllerTest {
     void testAddRestaurantWithMissingParameter(String missingParam) throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
+        requestParams.put("type", "Food Type");
+        requestParams.put("startTime", "07:00");
+        requestParams.put("endTime", "19:00");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
 
@@ -197,9 +197,9 @@ class RestaurantControllerTest {
     void testAddRestaurantWithMissingAddressParameters(String field, String scenario) throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
+        requestParams.put("type", "Food Type");
+        requestParams.put("startTime", "07:00");
+        requestParams.put("endTime", "19:00");
         requestParams.put("description", "Test Description");
 
         Map<String, String> addressParams = new HashMap<>();
@@ -227,9 +227,9 @@ class RestaurantControllerTest {
     void testAddRestaurantWithBadParameter(String timeField) throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
+        requestParams.put("type", "Food Type");
+        requestParams.put("startTime", "07:00");
+        requestParams.put("endTime", "19:00");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
 
@@ -246,9 +246,9 @@ class RestaurantControllerTest {
     void testAddRestaurantWhenRestaurantAlreadyExists() throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
+        requestParams.put("type", "Food Type");
+        requestParams.put("startTime", "07:00");
+        requestParams.put("endTime", "19:00");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
         doThrow(new DuplicatedRestaurantName()).when(restaurantService).addRestaurant(Mockito.anyString(),
@@ -269,9 +269,9 @@ class RestaurantControllerTest {
     void testAddRestaurantWhenUserIsNotManager() throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
+        requestParams.put("type", "Food Type");
+        requestParams.put("startTime", "07:00");
+        requestParams.put("endTime", "19:00");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
         doThrow(new UserNotManager()).when(restaurantService).addRestaurant(Mockito.anyString(),
@@ -292,9 +292,9 @@ class RestaurantControllerTest {
     void testAddRestaurantWhenWorkingTimeIsNotValid() throws Exception {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("name", "Test");
-        requestParams.put("type", "Fast Food");
-        requestParams.put("startTime", "09:00");
-        requestParams.put("endTime", "22:00");
+        requestParams.put("type", "Food Type");
+        requestParams.put("startTime", "07:00");
+        requestParams.put("endTime", "19:00");
         requestParams.put("description", "Test Description");
         requestParams.put("address", Map.of("country", "Country", "city", "City", "street", "Street"));
         doThrow(new InvalidWorkingTime()).when(restaurantService).addRestaurant(Mockito.anyString(),
@@ -341,7 +341,7 @@ class RestaurantControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("restaurant types"))
                 .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0]").value("Fast Food"));
+                .andExpect(jsonPath("$.data[0]").value("Food Type"));
     }
 
     @Test
@@ -376,5 +376,28 @@ class RestaurantControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("test"));
 
+    }
+
+
+    @Test
+    void testGetManagerRestaurantsSuccessfully() throws Exception {
+        List<Restaurant> restaurantList = Collections.singletonList(sampleRestaurant);
+        when(restaurantService.getManagerRestaurants(eq(1))).thenReturn(restaurantList);
+        mockMvc.perform(get("/restaurants/manager/{managerId}", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("manager restaurants listed"))
+                .andExpect(jsonPath("$.data[0].name").value("Test"))
+                .andExpect(jsonPath("$.data[0].type").value("Food Type"))
+                .andExpect(jsonPath("$.data[0].description").value("Test Description"));
+    }
+
+    @Test
+    void testGetManagerRestaurantsWhenBadRequest() throws Exception {
+        when(restaurantService.getManagerRestaurants(eq(1)))
+                .thenThrow(new RuntimeException("test"));
+
+        mockMvc.perform(get("/restaurants/manager/{managerId}", 1))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("test"));
     }
 }
