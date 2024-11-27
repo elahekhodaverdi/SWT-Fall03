@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(TableController.class)
-public class TableControllerTest {
+public class TableControllerApiTest {
     private Restaurant restaurant;
     private Table table;
 

@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(RestaurantController.class)
-class RestaurantControllerTest {
+class RestaurantControllerApiTest {
 
     @Autowired
     private MockMvc mockMvc;
