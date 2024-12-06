@@ -1,14 +1,12 @@
 name: Java CI with Maven CA5
-
 on:
   push:
-    paths: [ "Fesadyab/**" ]
+    branches: [ "master" ]
   pull_request:
-    paths: [ "Fesadyab/**" ]
+    branches: [ "master" ]
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -19,9 +17,5 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
-      working-directory: Fesadyab
-      run: mvn clean compile
-    - name: Test with Maven
-      working-directory: Fesadyab
-      run: mvn test
+    - name: Build and Test with Maven
+      run: cd Fesadyab && mvn test -B -f pom.xml
