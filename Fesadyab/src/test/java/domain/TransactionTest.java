@@ -19,6 +19,7 @@ public class TransactionTest {
     @Test
     @DisplayName("Test equals with null object")
     public void testEqualsWithNull() {
+        System.out.println("------------------------------**********-----");
         assertFalse(transaction.equals(null));
     }
 
