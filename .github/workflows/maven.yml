@@ -18,4 +18,4 @@ jobs:
         distribution: 'oracle'
         cache: maven
     - name: Build and Test with Maven
-      run: cd Fesadyab && mvn test -B -f pom.xml
+      run: cd Fesadyab && mvn clean test -B -f pom.xml
