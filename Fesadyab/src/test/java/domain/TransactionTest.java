@@ -13,6 +13,7 @@ public class TransactionTest {
     void setUp() {
         transaction = new Transaction();
         transaction.setTransactionId(0);
+        System.out.println("=====================================================");
     }
 
     @Test
