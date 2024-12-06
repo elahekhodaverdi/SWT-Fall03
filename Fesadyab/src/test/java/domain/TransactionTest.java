@@ -13,13 +13,12 @@ public class TransactionTest {
     void setUp() {
         transaction = new Transaction();
         transaction.setTransactionId(0);
-        System.out.println("=====================================================");
     }
 
     @Test
     @DisplayName("Test equals with null object")
     public void testEqualsWithNull() {
-        System.out.println("------------------------------**********-----");
+        setUp();
         assertFalse(transaction.equals(null));
     }
 
