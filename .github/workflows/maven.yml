@@ -19,13 +19,5 @@ jobs:
         distribution: 'oracle'
         cache: 'maven'
 
-    - name: Print Java and Maven versions
-      run: |
-        java -version
-        mvn -version
-
-    - name: List Files
-      run: ls -la ./Fesadyab
-
     - name: Build and Test with Maven
-      run: mvn clean test -B -e -X -f ./Fesadyab/pom.xml
+      run: mvn clean test -B -e -f ./Fesadyab/pom.xml
