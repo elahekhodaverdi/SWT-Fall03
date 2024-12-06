@@ -11,11 +11,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 21
+
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        java-version: '17'
         distribution: 'oracle'
         cache: 'maven'
+
+    - name: Print Java and Maven versions
+      run: |
+        java -version
+        mvn -version
+
+    - name: List Files
+      run: ls -la ./Fesadyab
+
     - name: Build and Test with Maven
-      run: cd Fesadyab && mvn clean test -B -f pom.xml
+      run: mvn clean test -B -e -X -f ./Fesadyab/pom.xml
