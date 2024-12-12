@@ -156,13 +156,13 @@ class TransactionEngineTest {
     }
 
     @Test
-    @DisplayName("test transaction pattern, when the history is empty")
+    @DisplayName("Test transaction pattern, when the history is empty")
     public void testTransactionPatternWhenHistoryIsEmpty() {
         assertEquals(0, engine.getTransactionPatternAboveThreshold(100));
     }
 
     @Test
-    @DisplayName("test transaction pattern with all transaction less that or equal to the threshold")
+    @DisplayName("Test transaction pattern with all transaction less that or equal to the threshold")
     public void testTransactionPatternWithAllTransactionsBelowTheThreshold() {
         engine.transactionHistory = new ArrayList<>(List.of(
                 createTransaction(1, 1, 100),
@@ -174,7 +174,7 @@ class TransactionEngineTest {
     }
 
     @Test
-    @DisplayName("test transaction pattern with no consistent pattern")
+    @DisplayName("Test transaction pattern with no consistent pattern")
     public void testTransactionPatternWithNoPattern() {
         engine.transactionHistory = new ArrayList<>(List.of(
                 createTransaction(1, 1, 10),
