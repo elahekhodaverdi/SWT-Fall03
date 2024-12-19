@@ -11,9 +11,9 @@ Feature: Add Reservation
     And the reservation number should be 0
 
   Scenario: Adding multiple reservations
-    Given a user with username "jane_doe" and role "client"
-    And a restaurant named "Cozy Diner"
-    When the user adds a reservation for "Cozy Diner" on "2024-12-10T10:00"
-    And the user adds a reservation for "Cozy Diner" on "2024-12-11T10:00"
+    Given a user with username "Mahdi" and role "client"
+    And a restaurant named "Test"
+    When the user adds a reservation for "Test" on "2024-12-10T10:00"
+    And the user adds a reservation for "Test" on "2024-12-11T10:00"
     Then the reservation list should contain 2 reservations
     And the reservation numbers should be 0 and 1
