@@ -39,7 +39,6 @@ public class GUITest {
     driver.findElement(By.xpath("//input[@value='1']")).sendKeys("1");
     driver.findElement(By.xpath("//input[@value='1']")).sendKeys(Keys.ENTER);
     driver.findElement(By.xpath("//div[@id='operations-restaurant-controller-getRestaurants']/div[2]/div/div/div[2]/div/table/tbody/tr[2]/td[2]/div/textarea")).click();
-    driver.findElement(By.xpath("//div[@id='operations-restaurant-controller-getRestaurants']/div[2]/div/div/div[2]/div/table/tbody/tr[2]/td[2]/div/textarea")).click();
     driver.findElement(By.xpath("//div[@id='operations-restaurant-controller-getRestaurants']/div[2]/div/div/div[2]/div/table/tbody/tr[2]/td[2]/div/textarea")).clear();
     driver.findElement(By.xpath("//div[@id='operations-restaurant-controller-getRestaurants']/div[2]/div/div/div[2]/div/table/tbody/tr[2]/td[2]/div/textarea")).sendKeys("{\n\n}");
     driver.findElement(By.xpath("//div[@id='operations-restaurant-controller-getRestaurants']/div[2]/div/div[2]/button")).click();
@@ -55,14 +54,6 @@ public class GUITest {
     driver.findElement(By.xpath("//input[@value='2025-10-26']")).clear();
     driver.findElement(By.xpath("//input[@value='2025-10-26']")).sendKeys("2025-10-26");
     driver.findElement(By.xpath("//input[@value='2025-10-26']")).sendKeys(Keys.ENTER);
-    driver.findElement(By.xpath("//input[@value='2']")).click();
-    driver.findElement(By.xpath("//input[@value='2025-10-26']")).clear();
-    driver.findElement(By.xpath("//input[@value='2025-10-26']")).sendKeys("2025-10-26");
-    driver.findElement(By.xpath("//input[@value='2']")).sendKeys(Keys.ENTER);
-    driver.findElement(By.xpath("//div[@id='operations-reservation-controller-getAvailableTimes']/div[2]/div/div/div[2]/div/table/tbody/tr/td[2]/input")).click();
-    driver.findElement(By.xpath("//input[@value='2025-10-26']")).clear();
-    driver.findElement(By.xpath("//input[@value='2025-10-26']")).sendKeys("2025-10-26");
-    driver.findElement(By.xpath("//div[@id='operations-reservation-controller-getAvailableTimes']/div[2]/div/div/div[2]/div/table/tbody/tr/td[2]/input")).sendKeys(Keys.ENTER);
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-getAvailableTimes']/div[2]/div/div[2]/button")).click();
     driver.findElement(By.cssSelector("#operations-reservation-controller-addReservation > div.opblock-summary.opblock-summary-post > button.opblock-summary-control > svg.arrow")).click();
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div/div[2]/button")).click();
@@ -71,9 +62,8 @@ public class GUITest {
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div[2]/div/table/tbody/tr/td[2]/input")).sendKeys("1");
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div[2]/div/table/tbody/tr/td[2]/input")).sendKeys(Keys.ENTER);
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div[3]/div[2]/div/div/div/textarea")).click();
-    driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div[3]/div[2]/div/div/div/textarea")).click();
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div[3]/div[2]/div/div/div/textarea")).clear();
-    driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div[3]/div[2]/div/div/div/textarea")).sendKeys("{\n\"people\" : 2,\n\"datetime\": \"2025-10-26 13:00\"\n}");
+    driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div/div[3]/div[2]/div/div/div/textarea")).sendKeys("{\n\"people\": 2,\n    \"datetime\": \"2025-10-26 13:00\"\n}");
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-addReservation']/div[2]/div/div[2]/button")).click();
     driver.findElement(By.cssSelector("#operations-reservation-controller-getCustomerReservations > div.opblock-summary.opblock-summary-get > button.opblock-summary-control > svg.arrow")).click();
     driver.findElement(By.xpath("//div[@id='operations-reservation-controller-getCustomerReservations']/div[2]/div/div/div/div[2]/button")).click();
