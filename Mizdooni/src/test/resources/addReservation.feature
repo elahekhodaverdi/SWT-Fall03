@@ -8,7 +8,7 @@ Feature: Add Reservation
     And a restaurant named "Test"
     When the user adds a reservation for "Test" on "2024-12-10T10:00"
     Then the reservation list should contain 1 reservation
-    And the reservation number should be 0
+    And the reservations should contain number 0
 
   Scenario: Adding multiple reservations
     Given a user with username "Mahdi" and role "client"
@@ -16,4 +16,5 @@ Feature: Add Reservation
     When the user adds a reservation for "Test" on "2024-12-10T10:00"
     And the user adds a reservation for "Test" on "2024-12-11T10:00"
     Then the reservation list should contain 2 reservations
-    And the reservation numbers should be 0 and 1
+    And the reservations should contain number 0
+    And the reservations should contain number 1

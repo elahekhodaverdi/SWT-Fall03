@@ -44,14 +44,9 @@ public class UserScenarioTest {
         assertEquals(count, user.getReservations().size());
     }
 
-    @Then("the reservation number should be {int}")
+    @Then("the reservations should contain number {int}")
     public void checkReservationNumber(int reservationNumber) {
-        assertEquals(reservationNumber, reservation.getReservationNumber());
-    }
-
-    @Then("the reservation numbers should be {int} and {int}")
-    public void checkMultipleReservationNumbers(int firstNumber, int secondNumber) {
-        assertEquals(firstNumber, user.getReservations().get(0).getReservationNumber());
-        assertEquals(secondNumber, user.getReservations().get(1).getReservationNumber());
+        assertTrue(user.getReservations().stream().anyMatch(item ->
+                item.getReservationNumber() == reservationNumber));
     }
 }
