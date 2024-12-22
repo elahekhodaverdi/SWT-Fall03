@@ -18,21 +18,20 @@ public class UserScenarioTest {
     private Reservation reservation;
     private final Address address = new Address("Country", "City", "Street");
 
-    @Given("a user with username {string} and role {string}")
-    public void createUser(String username, String role) {
-        User.Role userRole = User.Role.valueOf(role);
-        user = new User(username, "password123", "user@test.com", address, userRole);
+    @Given("a user with role client")
+    public void createUser() {
+        user = new User("test", "password123", "user@test.com", address, User.Role.client);
     }
 
-    @Given("a restaurant named {string}")
-    public void createRestaurant(String restaurantName) {
+    @Given("a restaurant to reserve in")
+    public void createRestaurant() {
         User manager = new User("testManager", "password456", "manager@test.com", address, User.Role.manager);
-        restaurant = new Restaurant(restaurantName, manager,"Fast food", LocalTime.now(),
+        restaurant = new Restaurant("test", manager,"Fast food", LocalTime.now(),
                 LocalTime.now().plusHours(10), "",address, "");
     }
 
-    @When("the user adds a reservation for {string} on {string}")
-    public void addReservation(String restaurantName, String dateTime) {
+    @When("the user adds a reservation for the restaurant on {string}")
+    public void addReservation(String dateTime) {
         LocalDateTime reservationDateTime = LocalDateTime.parse(dateTime);
         Table table = new Table(1, restaurant.getId(), 1);
         reservation = new Reservation(user, restaurant, table, reservationDateTime);

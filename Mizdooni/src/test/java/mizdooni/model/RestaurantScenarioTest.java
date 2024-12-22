@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,16 +36,23 @@ public class RestaurantScenarioTest {
                 rating1.overall == rating2.overall);
     }
 
-    @Given("a restaurant named {string} managed by {string}")
-    public void createRestaurant(String restaurantName, String managerName) {
-        manager = new User(managerName, "password456", "manager@test.com", address, User.Role.manager);
-        restaurant = new Restaurant(restaurantName, manager,"Fast food", LocalTime.now(),
+    @Given("a restaurant")
+    public void createRestaurant() {
+        manager = new User("testManager", "password456", "manager@test.com", address, User.Role.manager);
+        restaurant = new Restaurant("test", manager,"Fast food", LocalTime.now(),
                 LocalTime.now().plusHours(10), "",address, "");
     }
 
-    @Given("a user {string} adds a review with food {int}, service {int}, ambiance {int}, and overall {int} with comment {string}")
-    public void addReview(String username, int food, int service, int ambiance, int overall, String comment) {
-        user = new User(username, "password123", "user@example.com", address, User.Role.client);
+    @Given("a user that adds a review with food {int}, service {int}, ambiance {int}, and overall {int} with comment {string}")
+    public void addReview(int food, int service, int ambiance, int overall, String comment) {
+        user = new User("test", "password123", "user@example.com", address, User.Role.client);
+        review = new Review(user, createRating(food, service, ambiance, overall), comment, LocalDateTime.now());
+        restaurant.addReview(review);
+    }
+
+    @Given("another user that adds a review with food {int}, service {int}, ambiance {int}, and overall {int} with comment {string}")
+    public void addNewReview(int food, int service, int ambiance, int overall, String comment) {
+        user = new User("testUser", "password123", "user@example.com", address, User.Role.client);
         review = new Review(user, createRating(food, service, ambiance, overall), comment, LocalDateTime.now());
         restaurant.addReview(review);
     }
