@@ -4,7 +4,7 @@ Feature: Calculate Average Rating of a Restaurant
   So that I can assess overall satisfaction
 
   Scenario Outline: Calculating the average rating for a single review
-    Given a restaurant
+    Given a restaurant with no reviews
     And a user that adds a review with food <food>, service <service>, ambiance <ambiance>, and overall <overall> with comment "<comment>"
     When the restaurant manager views the reviews
     Then the average rating should be food <average_food>, service <average_service>, ambiance <average_ambiance>, and overall <average_overall>
@@ -16,7 +16,7 @@ Feature: Calculate Average Rating of a Restaurant
       | 5    | 4       | 4        | 5       | Excellent | 5.0          | 4.0             | 4.0              | 5.0             |
 
   Scenario Outline: Calculating the average rating for reviews
-    Given a restaurant
+    Given a restaurant with no reviews
     And a user that adds a review with food <food1>, service <service1>, ambiance <ambiance1>, and overall <overall1> with comment "<comment1>"
     And another user that adds a review with food <food2>, service <service2>, ambiance <ambiance2>, and overall <overall2> with comment "<comment2>"
     When the restaurant manager views the reviews
