@@ -3,6 +3,11 @@ Feature: Calculate Average Rating of a Restaurant
   I want to calculate the average rating of a restaurant
   So that I can assess overall satisfaction
 
+  Scenario: Calculating the average rating for zero reviews
+    Given a restaurant with no reviews
+    When the restaurant manager views the reviews
+    Then the average rating should be food 0.0, service 0.0, ambiance 0.0, and overall 0.0
+
   Scenario Outline: Calculating the average rating for a single review
     Given a restaurant with no reviews
     And a user that adds a review with food <food>, service <service>, ambiance <ambiance>, and overall <overall> with comment "<comment>"

@@ -36,7 +36,7 @@ public class RestaurantScenarioTest {
                 rating1.overall == rating2.overall);
     }
 
-    @Given("a restaurant")
+    @Given("a restaurant with no reviews")
     public void createRestaurant() {
         manager = new User("testManager", "password456", "manager@test.com", address, User.Role.manager);
         restaurant = new Restaurant("test", manager,"Fast food", LocalTime.now(),
@@ -47,6 +47,13 @@ public class RestaurantScenarioTest {
     public void addReview(int food, int service, int ambiance, int overall, String comment) {
         user = new User("test", "password123", "user@example.com", address, User.Role.client);
         review = new Review(user, createRating(food, service, ambiance, overall), comment, LocalDateTime.now());
+        restaurant.addReview(review);
+    }
+
+    @Given("a user that adds a null review")
+    public void addReview() {
+        user = new User("test", "password123", "user@example.com", address, User.Role.client);
+        review = null;
         restaurant.addReview(review);
     }
 

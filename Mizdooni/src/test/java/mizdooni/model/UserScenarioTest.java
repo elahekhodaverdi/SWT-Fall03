@@ -18,7 +18,7 @@ public class UserScenarioTest {
     private Reservation reservation;
     private final Address address = new Address("Country", "City", "Street");
 
-    @Given("a user with role client")
+    @Given("a user with role client with no reservations")
     public void createUser() {
         user = new User("test", "password123", "user@test.com", address, User.Role.client);
     }
